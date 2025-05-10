@@ -4,10 +4,15 @@ phases:
   install:
     runtime-versions:
       nodejs: 18
+    commands:
+      - cd bmoodify
+      - npm install
+
   build:
     commands:
-      - cp -r bmoodify/* .
+      - cp -r * ../
 
 artifacts:
+  base-directory: bmoodify
   files:
     - '**/*'
