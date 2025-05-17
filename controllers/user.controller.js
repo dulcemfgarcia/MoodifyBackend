@@ -1,15 +1,18 @@
-const { json, format } = require('express/lib/response.js');
-const sequelize = require('../database/config.js');
 const User = require('../database/models/User.js');
 const bcrypt = require('bcrypt');
-const { Op } = require('sequelize');
+const jwt = require("jsonwebtoken");
+const sequelize = require("../database/config.js");
 
 require('dotenv').config();
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS);
 const PEPPER = process.env.PEPPER;
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRATION = process.env.JWT_EXPIRATION;
 
 const registerUser = async (req, res, next) => {
+    const t = await sequelize.transaction();
     try {
+        
         const { user, name, lastname, email, birthdate, password, idProfilePicture } = req.body;
 
         if (!user || !name || !lastname || !email || !birthdate || !password || !idProfilePicture) {
@@ -19,10 +22,10 @@ const registerUser = async (req, res, next) => {
             });
         }
 
-        const [day, month, year] = birthdate.split('/');
-        formatBirthdate = new Date(`${year}-${month}-${day}T00:00:00`);
+        const formatBirthdate = new Date(`${birthdate}T00:00:00`);
 
-        if (isNaN(formatBirthdate)) {
+        if (isNaN(formatBirthdate.getTime())) {
+            await t.rollback();
             return res.status(400).json({
                 error: true,
                 message: "The birthdate field have not been filled in correctly.",
@@ -31,6 +34,7 @@ const registerUser = async (req, res, next) => {
         }
 
         if (!validEmail(email)) {
+            await t.rollback();
             return res.status(400).json({
                 error: true,
                 message: "The email field have not been filled in correctly.",
@@ -48,14 +52,27 @@ const registerUser = async (req, res, next) => {
             birthdate: formatBirthdate,
             password: hashedPassword,
             idProfilePicture
-        });
+        }, { transaction: t });
 
+        const token = jwt.sign(
+            { id: newUser.idUser, email: newUser.email },
+            JWT_SECRET,
+            { expiresIn: JWT_EXPIRATION }
+        );
+
+        await t.commit();
         return res.status(201).json({
             error: false,
             message: "The user has been created successfully.",
-            data: newUser
+            data: {
+                idUser: newUser.idUser,
+                user: newUser.user,
+                idProfilePicture: newUser.idProfilePicture,
+                token: token
+            }
         });
     } catch (error) {
+        await t.rollback();
         console.log(`Error: ${error}`);
         return res.status(500).json({
             error: true,
@@ -73,11 +90,6 @@ async function hashPassword(passwordPlain) {
     const salt = await bcrypt.genSalt(SALT_ROUNDS);
     const peppered = PEPPER + passwordPlain;
     return bcrypt.hash(peppered, salt);
-}
-
-async function comparePassword(passwordPlain, hashStored) {
-  const peppered = PEPPER + passwordPlain;
-  return await bcrypt.compare(peppered, hashStored);
 }
 
 module.exports = { registerUser };
