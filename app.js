@@ -7,7 +7,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var userRouter = require('./routes/user');
+var authRouter = require('./routes/auth');
 var recommendRouter = require('./routes/recommendation');
 const historyRouter = require('./routes/history');
 
@@ -21,6 +22,16 @@ app.use(express.json({ limit: '20mb' }));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+// const allowedOrigins = ['http://localhost:3000', 'https://miapp.com'];
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       return callback(null, true);
+//     }
+//     return callback(new Error('No permitido por CORS'));
+//   }
+// }));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -28,7 +39,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/user', userRouter);
+app.use('/auth', authRouter);
 app.use('/api', recommendRouter);
 app.use('/api', historyRouter);
 
