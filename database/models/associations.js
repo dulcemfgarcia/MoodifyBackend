@@ -20,3 +20,7 @@
     RecommendationSong.belongsTo(Recommendation, {foreignKey: "idRecommendation"});
     Song.hasMany(RecommendationSong, {foreignKey: "idSong"});
     RecommendationSong.belongsTo(Song, {foreignKey: "idSong"}); 
+
+    // SONG Foreign key associations
+    Emotion.hasMany(Song, { foreignKey: "idEmotion" });
+    Song.belongsTo(Emotion, { foreignKey: "idEmotion" });
