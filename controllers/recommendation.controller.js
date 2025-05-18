@@ -41,11 +41,12 @@ const getAnalysis = async (req, res) => {
     });
 
     if (!emotion) {
+      console.log('Emotion not supported:', detectedEmotion);
       return res.status(404).json({ message: 'Emotion not supported' });
     }
 
     const songs = await Song.findAll({ //Query para obtener las canciones
-      where: { emotion: detectedEmotion },
+      where: { idEmotion: emotion.idEmotion },
       limit: 5,
       order: Sequelize.literal('RAND()')
     });
