@@ -1,3 +1,4 @@
+app.set('trust proxy', true); 
 require('dotenv').config();
 const cors = require('cors');
 var createError = require('http-errors');
@@ -19,14 +20,13 @@ var app = express();
 const allowedOrigins = [
   'https://moodifyproject.click',
   'https://www.moodifyproject.click',
-  'https://www.moodifyproject.click/signup',
   'http://localhost:3000'
 ];
 
-//CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    const cleanOrigin = origin?.replace(/\/$/, ''); // quitar / final
+    if (!origin || allowedOrigins.includes(cleanOrigin)) {
       callback(null, true);
     } else {
       callback(new Error('CORS no permitido'));
