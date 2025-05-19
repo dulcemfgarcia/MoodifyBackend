@@ -2,10 +2,10 @@ const { Sequelize } = require("sequelize");
 
 const sequelize = new Sequelize(
     "moodify_database",
-    "root",
-    "",
+    "admin",
+    "admin1234",
     {
-        host: "127.0.0.1",
+        host: "awseb-e-3sgurkmbpi-stack-awsebrdsdatabase-vz4b0batrit2.c636yo0s65kg.us-east-1.rds.amazonaws.com",
         dialect: "mysql",
         logging: false,
         define: {
