@@ -16,29 +16,38 @@ const dashboardRouter = require('./routes/dashboard');
 
 var app = express();
 
-app.use(cors());
+const allowedOrigins = [
+  'https://www.moodifyproject.click',
+  'http://localhost:3000'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('CORS no permitido'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json({ limit: '20mb' }));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-// const allowedOrigins = ['http://localhost:3000', 'https://miapp.com'];
 
-// app.use(cors({
-//   origin: function (origin, callback) {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       return callback(null, true);
-//     }
-//     return callback(new Error('No permitido por CORS'));
-//   }
-// }));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.options('*', cors());
 app.use('/', indexRouter);
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
