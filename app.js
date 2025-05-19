@@ -17,6 +17,7 @@ const dashboardRouter = require('./routes/dashboard');
 var app = express();
 
 const allowedOrigins = [
+  'https://moodifyproject.click',
   'https://www.moodifyproject.click',
   'http://localhost:3000'
 ];
