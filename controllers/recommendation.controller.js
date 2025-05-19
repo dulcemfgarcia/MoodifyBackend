@@ -1,4 +1,5 @@
 require('dotenv').config();
+const jwt = require("jsonwebtoken");
 const AWS = require('aws-sdk');
 const { Op, Sequelize } = require('sequelize');
 const { Emotion, Song, Recommendation, RecommendationSong } = require('../database/models');
@@ -12,6 +13,22 @@ AWS.config.update({
 const rekognition = new AWS.Rekognition();
 
 const getAnalysis = async (req, res) => {
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1]; //Se extrae el token, que debería venir después de "Bearer"
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+
+  const userId = decoded.id;
+
   try {
     const { content } = req.body;
 
@@ -53,7 +70,7 @@ const getAnalysis = async (req, res) => {
 
     //Almacenar la recomendación en la tabla Recommendation
     const recommendation = await Recommendation.create({
-      idUser: 1,
+      idUser: userId,
       idEmotion: emotion.idEmotion
     });
 
