@@ -1,4 +1,3 @@
-app.set('trust proxy', true); 
 require('dotenv').config();
 const cors = require('cors');
 var createError = require('http-errors');
@@ -16,6 +15,7 @@ const dashboardRouter = require('./routes/dashboard');
 
 
 var app = express();
+app.set('trust proxy', true); 
 
 const allowedOrigins = [
   'https://moodifyproject.click',
