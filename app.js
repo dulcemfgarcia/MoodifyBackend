@@ -21,18 +21,22 @@ const allowedOrigins = [
   'http://localhost:3000'
 ];
 
-app.use(cors({
+//CORS configuration
+const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
+      callback(null, true);
     } else {
-      return callback(new Error('CORS no permitido'));
+      callback(new Error('CORS no permitido'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(express.json({ limit: '20mb' }));
 
@@ -47,7 +51,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.options('*', cors());
 app.use('/', indexRouter);
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
