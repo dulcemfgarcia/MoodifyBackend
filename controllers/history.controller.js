@@ -1,8 +1,23 @@
+const jwt = require("jsonwebtoken");
 const { Recommendation, RecommendationSong, Song, Emotion } = require('../database/models');
 
 const getHistory = async (req, res) => {
   try {
-    const userId = 1; //POR CORREGIR: el id del user logueado
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1]; //Extraer el token en la posición 1, después del Bearer
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    const userId = decoded.id;
+
     const { feeling } = req.query;
 
     const includes = [
@@ -27,7 +42,7 @@ const getHistory = async (req, res) => {
 
     // Filtro por emoción
     if (feeling) { //Aquí leemos si dentro del request viene lleno el "feeling". Si no, devuelve todas las recomendaciones, si sí, filtra por la emoción con un where.
-      includes[0].where = { emotion: feeling };
+      where["$Emotion.emotion$"] = feeling;
     }
 
     const recommendations = await Recommendation.findAll({
