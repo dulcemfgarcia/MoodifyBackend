@@ -19,6 +19,7 @@ var app = express();
 const allowedOrigins = [
   'https://moodifyproject.click',
   'https://www.moodifyproject.click',
+  'https://www.moodifyproject.click/signup',
   'http://localhost:3000'
 ];
 
